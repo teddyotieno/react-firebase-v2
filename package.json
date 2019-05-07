@@ -9,6 +9,7 @@
     "prod": "parcel build src/index.html"
   },
   "dependencies": {
+    "firebase": "^6.0.0",
     "moment": "^2.24.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
@@ -19,5 +20,8 @@
     "@babel/preset-env": "^7.4.4",
     "parcel-bundler": "^1.12.3",
     "sass": "^1.20.1"
-  }
+  },
+  "browserslist": [
+    "last 1 chrome version"
+  ]
 }
