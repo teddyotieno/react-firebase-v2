@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { firestore } from "../firebase";
 import Posts from "./Posts";
+import { collectIdsAndDocs } from "../utlities";
+import { async, all } from "q";
 
 class Application extends Component {
   state = {
@@ -9,18 +11,23 @@ class Application extends Component {
 
   componentDidMount = async () => {
     const snapshot = await firestore.collection("posts").get();
-    const posts = snapshot.docs.map(doc => {
-      return {
-        id: doc.id,
-        ...doc.data()
-      };
-    });
+    const posts = snapshot.docs.map(collectIdsAndDocs);
     this.setState({ posts });
   };
 
-  handleCreate = post => {
+  handleCreate = async post => {
     const { posts } = this.state;
-    this.setState({ posts: [post, ...posts] });
+    const docRef = await firestore.collection("posts").add(post);
+    const doc = await docRef.get();
+    const newPost = collectIdsAndDocs(doc);
+    this.setState({ posts: [newPost, ...posts] });
+  };
+
+  handleRemove = async id => {
+    const allPosts = this.state.posts;
+    await firestore.doc(`posts/${id}`).delete();
+    const posts = allPosts.filter(post => post.id !== id);
+    this.setState({ posts });
   };
 
   render() {
@@ -29,7 +36,11 @@ class Application extends Component {
     return (
       <main className="Application">
         <h1>Think Piece</h1>
-        <Posts posts={posts} onCreate={this.handleCreate} />
+        <Posts
+          posts={posts}
+          onCreate={this.handleCreate}
+          onRemove={this.handleRemove}
+        />
       </main>
     );
   }
